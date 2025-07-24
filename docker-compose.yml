@@ -43,7 +43,7 @@ services:
     networks:
       - app_net
     ports:
-      - "80:8080"
+      - "8087:8080"
     volumes:
       - ./keycloak-russian-providers-26.0.0.rsp.jar:/opt/keycloak/providers/keycloak-russian-providers-26.0.0.rsp.jar
       - ./keycloak-grpc-spi-1.0.0-jar-with-dependencies.jar:/opt/keycloak/providers/keycloak-grpc-spi-1.0.0-jar-with-dependencies.jar
