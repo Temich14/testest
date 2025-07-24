@@ -49,6 +49,7 @@ services:
       - ./keycloak-grpc-spi-1.0.0-jar-with-dependencies.jar:/opt/keycloak/providers/keycloak-grpc-spi-1.0.0-jar-with-dependencies.jar
       - ./json-path-2.7.0.jar:/opt/keycloak/providers/json-path-2.7.0.jar
       - ./json-smart-2.4.8.jar:/opt/keycloak/providers/json-smart-2.4.8.jar
+      - ./realms:/opt/keycloak/data/import
     command: start
 
   profile:
