@@ -1,0 +1,127 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: keycloak-postgres
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U keycloak -d keycloak" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg:/var/lib/postgresql/data
+    networks:
+      - app_net
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_STRICT: "false"
+      KC_SPI_EVENTS_LISTENER__KAFKA_EVENT_HOOK__ENABLED: "true"
+      KC_SPI_EVENTS_LISTENER__KAFKA_EVENT_HOOK__BOOTSTRAP_SERVERS: "kafka:9092"
+      KC_SPI_EVENTS_LISTENER__KAFKA_EVENT_HOOK__TOPIC_EVENTS: "user-events"
+      KC_SPI_EVENTS_LISTENER__KAFKA_EVENT_HOOK__EVENTS: "LOGIN,REGISTER,UPDATE_PROFILE"
+      KC_SPI_EVENTS_LISTENER__KAFKA_EVENT_HOOK__USER_ATTRIBUTES: ""
+      KC_SPI_EVENTS_LISTENER__GRPCPROVIDER__HOST: "consumer"
+      KC_SPI_EVENTS_LISTENER__GRPCPROVIDER__PORT: "50001"
+    depends_on:
+      - postgres
+    networks:
+      - app_net
+    ports:
+      - "80:8080"
+    volumes:
+      - ./keycloak-russian-providers-26.0.0.rsp.jar:/opt/keycloak/providers/keycloak-russian-providers-26.0.0.rsp.jar
+      - ./keycloak-grpc-spi-1.0.0-jar-with-dependencies.jar:/opt/keycloak/providers/keycloak-grpc-spi-1.0.0-jar-with-dependencies.jar
+      - ./json-path-2.7.0.jar:/opt/keycloak/providers/json-path-2.7.0.jar
+      - ./json-smart-2.4.8.jar:/opt/keycloak/providers/json-smart-2.4.8.jar
+    command: start
+
+  profile:
+    build:
+      context: .       # <- если Dockerfile лежит в ./consumer
+    container_name: profile
+    ports:
+      - "50001:50001"
+    networks:
+      - app_net
+    depends_on:
+      - profiledb
+    environment:
+      DATABASE_URL: "postgres://postgres:postgres@profiledb:5432/postgres"
+      BROKERS: "kafka:9092"
+      TOPIC: "user-events"
+    restart: on-failure
+
+  migrate:
+    image: migrate/migrate
+    depends_on:
+      profiledb:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: ./migrations
+        target: /migrations
+    entrypoint: >
+      /bin/sh -c "
+        migrate -path=/migrations -database postgres://postgres:postgres@profiledb:5432/postgres?sslmode=disable up
+      "
+    networks:
+      - app_net
+    restart: "no"
+  profiledb:
+    image: postgres:15
+    container_name: kprofiledb
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - profile-pg:/var/lib/postgresql/data
+    networks:
+      - app_net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+#  krakend:
+#    image: krakend
+#    expose:
+#      - 8082
+#    ports:
+#      - "8082:8080"
+#    volumes:
+#      - ./krakend.json:/etc/krakend/krakend.json
+#    command: [ "run", "-c", "/etc/krakend/krakend.json" ]
+#    networks:
+#      - app_net
+
+volumes:
+  pg:
+  zk_data:
+  kafka_data:
+  profile-pg:
+
+networks:
+  app_net:
+    driver: bridge
