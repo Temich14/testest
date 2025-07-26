@@ -29,8 +29,6 @@ services:
       KC_HOSTNAME_STRICT_HTTPS: "true"
       KC_HTTPS_CERTIFICATE_FILE: ./cert.pem
       KC_HTTPS_CERTIFICATE_KEY_FILE: ./key.pem
-    depends_on:
-      - postgres
     networks:
       - app_net
     ports:
