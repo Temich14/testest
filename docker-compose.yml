@@ -24,11 +24,11 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HTTP_ENABLED: true
-      KC_HTTPS_ENABLED: false          # disable HTTPS
-      KC_HOSTNAME_STRICT: false        # disable strict hostname check
-      KC_HOSTNAME_STRICT_HTTPS: false
-      KC_SSL_REQUIRED: false
+      KC_HOSTNAME: 109.123.155.176
+      KC_HOSTNAME_STRICT: "true"
+      KC_HOSTNAME_STRICT_HTTPS: "true"
+      KC_HTTPS_CERTIFICATE_FILE: ./cert.pem
+      KC_HTTPS_CERTIFICATE_KEY_FILE: ./key.pem
     depends_on:
       - postgres
     networks:
@@ -41,7 +41,7 @@ services:
       - ./json-path-2.7.0.jar:/opt/keycloak/providers/json-path-2.7.0.jar
       - ./json-smart-2.4.8.jar:/opt/keycloak/providers/json-smart-2.4.8.jar
       - ./realms:/opt/keycloak/data/import
-    command: ["start-dev", "--hostname-strict=false", "--hostname-strict-https=false"]
+    command: "start-dev"
 
   profile:
     build:
