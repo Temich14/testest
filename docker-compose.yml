@@ -25,6 +25,9 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_HTTP_ENABLED: true
+      KC_HTTPS_ENABLED: false          # disable HTTPS
+      KC_HOSTNAME_STRICT: false        # disable strict hostname check
+      KC_HOSTNAME_STRICT_HTTPS: false
     depends_on:
       - postgres
     networks:
