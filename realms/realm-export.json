@@ -42,7 +42,7 @@
   "maxTemporaryLockouts": 0,
   "bruteForceStrategy": "MULTIPLE",
   "maxFailureWaitSeconds": 900,
-  "minimumQuickLoginWaitSeconds": 60,
+  "minimumQuickLoginWaitSeconds": 50,
   "waitIncrementSeconds": 60,
   "quickLoginCheckMilliSeconds": 1000,
   "maxDeltaTimeSeconds": 43200,
