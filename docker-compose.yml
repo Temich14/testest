@@ -37,7 +37,11 @@ services:
       - ./json-path-2.7.0.jar:/opt/keycloak/providers/json-path-2.7.0.jar
       - ./json-smart-2.4.8.jar:/opt/keycloak/providers/json-smart-2.4.8.jar
       - ./realms:/opt/keycloak/data/import
-    command: "start-dev"
+    command: >
+      sh -c "
+        /opt/keycloak/bin/kc.sh import --dir /opt/keycloak/data/import &&
+        /opt/keycloak/bin/kc.sh start-dev
+      "
 
   profile:
     build:
