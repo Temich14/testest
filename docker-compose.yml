@@ -28,6 +28,7 @@ services:
       KC_HTTPS_ENABLED: false          # disable HTTPS
       KC_HOSTNAME_STRICT: false        # disable strict hostname check
       KC_HOSTNAME_STRICT_HTTPS: false
+      KC_SSL_REQUIRED: false
     depends_on:
       - postgres
     networks:
